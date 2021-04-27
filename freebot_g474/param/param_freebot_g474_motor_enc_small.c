@@ -34,8 +34,8 @@ const volatile Param __attribute__ ((section ("flash_param"))) param_store = {
     .main_loop_param.torque_sensor.bias = 0,
     .main_loop_param.torque_sensor.k_temp = 0,
     .fast_loop_param.vbus_gain = 1.0/4096*(215+13.7)/13.7,
-    .main_loop_param.position_controller_param.position.kp = 20,
-    .main_loop_param.position_controller_param.position.kd = .15,
+    .main_loop_param.position_controller_param.position.kp = 100,
+    .main_loop_param.position_controller_param.position.kd = .3,
     .main_loop_param.position_controller_param.position.velocity_filter_frequency_hz = 400,
     .main_loop_param.position_controller_param.position.command_max = 5,
     .main_loop_param.torque_controller_param.torque.kp = 10,
@@ -59,15 +59,15 @@ const volatile Param __attribute__ ((section ("flash_param"))) param_store = {
     .main_loop_param.velocity_controller_param.velocity.velocity_filter_frequency_hz = 400,
     .main_loop_param.velocity_controller_param.velocity.output_filter_frequency_hz = 400,
     .main_loop_param.velocity_controller_param.velocity.command_max = 5,
-    .main_loop_param.velocity_controller_param.acceleration_limit = 4,
+    .main_loop_param.velocity_controller_param.acceleration_limit = 100,
     .main_loop_param.output_encoder.cpr = 65536,
     .main_loop_param.host_timeout = 0,
     .main_loop_param.safe_mode = DAMPED,
     .fast_loop_param.cogging.table = {
-//#include "cog_small.csv"
+#include "../../calibration/freebot_g474/motor_enc_small_j4/cog.dat"
     },
     .fast_loop_param.motor_encoder.table = {
-//#include "tab.csv"
+#include "../../calibration/freebot_g474/motor_enc_small_j4/enc.dat"
     },
     .drv_regs = {
         (2<<11) | 0x00,  // control_reg 0x00, 6 PWM mode

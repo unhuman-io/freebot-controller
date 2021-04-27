@@ -4,7 +4,7 @@ from scipy.fftpack import *
 from matplotlib.pyplot import *
 import numpy as np
 
-def circular_filt(x, y, nbins=1000, modx=2*pi, ffilt=.05, magfilt=0):
+def circular_filt(x, y, nbins=1000, modx=2*pi, ffilt=100, magfilt=0):
     xm = mod(x,modx)
     xi = linspace(0,modx, nbins+1)
     ibins = digitize(xm, xi)
@@ -17,7 +17,7 @@ def circular_filt(x, y, nbins=1000, modx=2*pi, ffilt=.05, magfilt=0):
     #yavgz = yavg - mean(yavg)
 
     f = fft(yavg)
-    freq = fftfreq(nbins)
+    freq = fftfreq(nbins, 1.0/nbins)
     f_filt = f
     f_filt[fabs(freq)>ffilt] = 0
     f_filt[absolute(f_filt)<magfilt] = 0

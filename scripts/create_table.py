@@ -28,30 +28,31 @@ class Table:
             self.table = self.parse_joint_table(nbins=self.args.table_size,index_pos=self.args.index_pos,n=self.args.gear_ratio)
         else:
             self.table = self.parse_cogging_table(nbins=self.args.table_size,index_pos=self.args.index_pos,cpr=self.args.cpr)
-        self.save()
+        self.save(self.args.outfile)
 
     def parse_encoder_table(self, nbins=32, index_pos=0, cpr=8192):
         e = self.data["motor_encoder0"]-float(index_pos)
-        vpos = self.data["motor_position0"] 
-        y = vpos - e*2*pi/cpr
-        x = e*2*pi/cpr     
-        i = where(abs(vpos) > .9*max(vpos))
-        x = delete(x, i) 
-        y = delete(y, i)
+        vpos = self.data["motor_position0"]
+        vpos = unwrap(vpos, 2*pi)
+        y = vpos + e*2*pi/float(cpr)
+        x = e*2*pi/float(cpr)     
+        # i = where(abs(vpos) > .9*max(vpos))
+        # x = delete(x, i) 
+        # y = delete(y, i)
 
-        return self.create_table(x, y, nbins)
+        return self.create_table(x, -y, nbins, 2)
 
     def parse_cogging_table(self, nbins=32, index_pos=0, cpr=8192):
         e = self.data["motor_encoder0"]-float(index_pos)
         iq = self.data["iq0"] 
         y = iq
-        x = e*2*pi/cpr
+        x = e*2*pi/float(cpr)
         xavg = x-mean(x)     
         i = where(abs(xavg) > .9*max(xavg))
         x = delete(x, i) 
         y = delete(y, i)
 
-        return self.create_table(x, y, nbins)
+        return self.create_table(x, y, nbins, 100)
 
     def parse_joint_table(self, nbins=32, index_pos=0, n=1.):
         e = self.data["joint_position0"]
@@ -61,11 +62,11 @@ class Table:
         i = where(abs(e) > .9*max(e))
         x = delete(x, i) 
         y = delete(y, i)
-        return self.create_table(x, y, nbins)
+        return self.create_table(x, y, nbins, 2)
 
 
-    def create_table(self, x, y, nbins):
-        yfilt = circular_filt(x, y-mean(y), nbins=nbins)
+    def create_table(self, x, y, nbins, ffilt):
+        yfilt = circular_filt(x, y-mean(y), nbins=nbins, ffilt=ffilt)
         xfilt = linspace(0, 2*pi, nbins+1)[:-1]
 
         yfiltd = fft_derivative(xfilt,yfilt)
@@ -84,13 +85,13 @@ class Table:
         show()
         return pchip
 
-    def save(self):
-        self.args.outfile.write("{")
-        savetxt(self.args.outfile, self.table, delimiter=',', newline="},\n{")
+    def save(self, outfile):
+        outfile.write("{")
+        savetxt(outfile, self.table, delimiter=',', newline="},\n{")
         # remove extra {
-        self.args.outfile.seek(0, os.SEEK_END)
-        size = self.args.outfile.tell()
-        self.args.outfile.truncate(size-1)
+        outfile.seek(0, os.SEEK_END)
+        size = outfile.tell()
+        outfile.truncate(size-1)
 
 if __name__ == "__main__":
     t = Table()
